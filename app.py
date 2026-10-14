@@ -21,6 +21,7 @@ st.markdown("""
 .app-title { font-size: 2.5rem; font-weight: 700; margin: 0; color: #fff; }
 .app-subtitle { color: #e94560; font-size: 1.1rem; margin-top: 0.5rem; font-weight: 600; }
 .result-card { background: #f8f9fa; border-radius: 14px; padding: 1.2rem; margin: 1rem 0; border-left: 6px solid #e94560; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+.result-card p, .result-card span { color: #2c3e50 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -78,12 +79,12 @@ with tab1:
                 st.markdown(f"""
                 <div class="result-card">
                     <h3 style="margin:0; color:#0f3460;">🏪 {row['দোকানের নাম']} <span style="font-size:0.8rem; color:#e94560; float:right;">আইডি: {row['দোকান আইডি']}</span></h3>
-                    <hr style="margin:8px 0; border:0; border-top:1px solid #eee;">
+                    <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
                     <p style="margin:4px 0;">📦 <strong>পণ্য:</strong> {row['প্রোডাক্টের নাম']} ({row['ওজন/সাইজ']})</p>
                     <p style="margin:4px 0;">🏷️ <strong>ব্র্যান্ড / কোম্পানি:</strong> {row['ব্র্যান্ড']} ({row['কোম্পানি']})</p>
                     <p style="margin:4px 0;">📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
                     <p style="margin:4px 0;">🏙️ <strong>এলাকা:</strong> {row['এলাকা']} | 📂 <strong>ক্যাটাগরি:</strong> {row['ক্যাটাগরি']}</p>
-                    <p style="margin:4px 0;">📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#27ae60; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
+                    <p style="margin:4px 0;">📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
                     <div style="margin-top:10px;">
                         <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600;">🟢 স্টকে উপলব্ধ</span>
                     </div>
