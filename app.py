@@ -22,13 +22,12 @@ st.markdown("""
 .app-title { font-size: 2.5rem; font-weight: 700; margin: 0; color: #fff; }
 .app-subtitle { color: #e94560; font-size: 1.1rem; margin-top: 0.5rem; font-weight: 600; }
 .result-card { background: #f8f9fa; border-radius: 14px; padding: 1.2rem; margin: 1rem 0; border-left: 6px solid #e94560; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-.result-card p, .result-card span { color: #2c3e50 !important; }
+.result-card p { color: #2c3e50 !important; margin: 4px 0; }
 .complaint-card { background: #fff5f5; border-radius: 12px; padding: 1.2rem; margin: 1rem 0; border-left: 6px solid #e74c3c; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-.complaint-card p, .complaint-card strong { color: #2c3e50 !important; }
+.complaint-card p { color: #2c3e50 !important; margin: 3px 0; }
 .herbal-card { background: #f0fff4; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 5px solid #27ae60; border: 1px solid #c6efce; }
 .herbal-card h4 { margin: 0 0 6px 0; color: #1e8449; }
 .herbal-card p { margin: 2px 0; color: #2c3e50 !important; font-size: 0.95rem; }
-.distance-badge { background: #e8f4f8; color: #2980b9; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; display: inline-block; margin-top: 5px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,14 +87,12 @@ with tab1:
             np.random.seed(100)
             base_lat, base_lon = 25.85, 88.60
             
-            # Simulated Lat/Lon and distance from user (base location)
             lats = base_lat + np.random.uniform(-0.03, 0.03, len(result_df))
             lons = base_lon + np.random.uniform(-0.03, 0.03, len(result_df))
             
             result_df['lat'] = lats
             result_df['lon'] = lons
             
-            # Approximate Distance calculation in KM from base point
             distances = np.sqrt((lats - base_lat)**2 + (lons - base_lon)**2) * 111.0
             result_df['distance_km'] = np.round(distances, 2)
 
@@ -106,21 +103,22 @@ with tab1:
             for idx, row in result_df.iterrows():
                 dist = row['distance_km']
                 dist_str = f"{int(dist*1000)} মিটার" if dist < 1.0 else f"{dist:.1f} কিমি"
-                walk_time = int(dist * 12) + 1  # Approximate walking time
+                walk_time = int(dist * 12) + 1
                 
                 st.markdown(f"""
                 <div class="result-card">
                     <h3 style="margin:0; color:#0f3460;">🏪 {row['দোকানের নাম']} <span style="font-size:0.8rem; color:#e94560; float:right;">আইডি: {row['দোকান আইডি']}</span></h3>
                     <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
-                    <p style="margin:4px 0;">📦 <strong>পণ্য:</strong> {row['প্রোডাক্টের নাম']} ({row['ওজন/সাইজ']})</p>
-                    <p style="margin:4px 0;">🏷️ <strong>ব্র্যান্ড / কোম্পানি:</strong> {row['ব্র্যান্ড']} ({row['কোম্পানি']})</p>
-                    <p style="margin:4px 0;">📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
-                    <p style="margin:4px 0;">🏙️ <strong>এলাকা:</strong> {row['এলাকা']} | 📂 <strong>ক্যাটাগরি:</strong> {row['ক্যাটাগরি']}</p>
-                    <p style="margin:4px 0;">📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
-                    
+                    <p>📦 <strong>পণ্য:</strong> {row['প্রোডাক্টের নাম']} ({row['ওজন/সাইজ']})</p>
+                    <p>🏷️ <strong>ব্র্যান্ড / কোম্পানি:</strong> {row['ব্র্যান্ড']} ({row['কোম্পানি']})</p>
+                    <p>📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
+                    <p>🏙️ <strong>এলাকা:</strong> {row['এলাকা']} | 📂 <strong>ক্যাটাগরি:</strong> {row['ক্যাটাগরি']}</p>
+                    <p>📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
+                    <p style="background:#e8f4f8; padding:6px 10px; border-radius:6px; color:#2980b9 !important; font-weight:bold; display:inline-block; margin-top:6px;">
+                        📏 আপনার অবস্থান থেকে আনুমানিক দূরত্ব: {dist_str} (প্রায় {walk_time} মিনিট হাঁটার পথ)
+                    </p>
                     <div style="margin-top:8px;">
-                        <span class="distance-badge">📏 আপনার অবস্থান থেকে দূরত্ব: <strong>{dist_str}</strong> (আনুমানিক {walk_time} মিনিট হাঁটার পথ)</span>
-                        <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600; margin-left:10px;">🟢 স্টকে উপলব্ধ</span>
+                        <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600;">🟢 স্টকে উপলব্ধ</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -283,9 +281,9 @@ with tab7:
                     <div class="complaint-card">
                         <h3 style="margin:0; color:#c0392b;">🚨 অভিযোগ #{idx+1} — দোকান: {c.get('shop')}</h3>
                         <hr style="margin:6px 0; border:0; border-top:1px solid #ddd;">
-                        <p style="margin:3px 0;">🏙️ <strong>এলাকা:</strong> {c.get('area')}</p>
-                        <p style="margin:3px 0;">📝 <strong>বিবরণ:</strong> {c.get('details')}</p>
-                        <p style="margin:3px 0; color:#7f8c8d; font-size:0.85rem;">⏱️ <strong>সময়:</strong> {c.get('time')}</p>
+                        <p>🏙️ <strong>এলাকা:</strong> {c.get('area')}</p>
+                        <p>📝 <strong>বিবরণ:</strong> {c.get('details')}</p>
+                        <p style="color:#7f8c8d; font-size:0.85rem;">⏱️ <strong>সময়:</strong> {c.get('time')}</p>
                         <div style="margin-top:8px;">
                             <span style="background:#e74c3c; color:white; padding:3px 10px; border-radius:4px; font-size:0.8rem; font-weight:600;">⚠️ তদন্তাধীন</span>
                         </div>
