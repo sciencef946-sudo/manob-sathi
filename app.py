@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 st.set_page_config(
-    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও সরকারি ড্যাশবোর্ড",
+    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও বাজার মনিটরিং",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -44,18 +44,19 @@ st.markdown("""
 <div class="app-header">
     <div style="font-size:3rem;">🛡️</div>
     <div class="app-title">মানব সাথি</div>
-    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক সুনির্দিষ্ট দোকান ফাইন্ডার ও সরকারি মনিটরিং প্যানেল</div>
+    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক দোকান ফাইন্ডার, প্রাইজ মনিটরিং ও গভঃ ড্যাশবোর্ড</div>
     <div style="color:#f1c40f; font-size:0.9rem; margin-top:0.4rem;">Created by Kaliagonj Naziraton High School (SOUNDARJYA)</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🔍 পণ্য, দোকান ও লাইভ ম্যাপ",
-    "🗺️ পূর্ণাঙ্গ জোন ম্যাপ",
-    "📋 সকল ৩২০টি দোকানের তালিকা",
-    "🚨 ভোক্তা অভিযোগ দাখিল",
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    "🔍 পণ্য ও লাইভ ম্যাপ",
+    "🗺️ জোন ম্যাপ",
+    "📋 ৩২০ দোকানের তালিকা",
+    "📊 বাজার দর তুলনা",
+    "🚨 ভোক্তা অভিযোগ",
     "🏥 স্বাস্থ্য সঙ্গী",
-    "🏛️ সরকারি কর্মকর্তা প্যানেল"
+    "🏛️ কর্মকর্তা প্যানেল"
 ])
 
 with tab1:
@@ -138,11 +139,30 @@ with tab3:
         st.error("⚠️ স্টোর ডাটাবেজ ফাইল পাওয়া যায়নি।")
 
 with tab4:
+    st.markdown("## 📊 বাজার দর তুলনা ও প্রাইজ মনিটরিং ট্র্যাকার")
+    st.info("জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের নির্ধারিত মূল্য তালিকার সাথে খুচরা বাজারের বর্তমান দামের রিয়েল-টাইম তুলনা।")
+    
+    # Sample price monitoring data
+    price_data = [
+        {"product": "নাজিরশাইল চাল (কেজি)", "gov_price": "৬৮-৭০ টাকা", "market_price": "৭২ টাকা", "status": "⚠️ অতিরিক্ত মূল্য"},
+        {"product": "সয়াবিন তেল (লিটার)", "gov_price": "১৭৫ টাকা", "market_price": "১৭৫ টাকা", "status": "✅ ন্যায্য মূল্য"},
+        {"product": "মসুর ডাল (দেশি কেজি)", "gov_price": "১৪০ টাকা", "market_price": "১৪৫ টাকা", "status": "⚠️ সামান্য বেশি"},
+        {"product": "বোতলজাত পানি (১ লিটার)", "\}}", "gov_price": "২০ টাকা", "market_price": "২০ টাকা", "status": "✅ ন্যায্য মূল্য"},
+        {"product": "চিনি (খোলা কেজি)", "gov_price": "১৩৫ টাকা", "market_price": "১৪০ টাকা", "status": "⚠️ অতিরিক্ত মূল্য"},
+        {"product": "ময়দা (প্যাকেট কেজি)", "gov_price": "৬৫ টাকা", "market_price": "৬৫ টাকা", "status": "✅ ন্যায্য মূল্য"}
+    ]
+    df_price = pd.DataFrame(price_data)
+    st.dataframe(df_price, use_container_width=True, hide_index=True)
+    
+    st.markdown("#### 💡 বাজার মনিটরিং সতর্কতা:")
+    st.warning("কোনো বিক্রেতা নির্ধারিত সরকারি মূল্যের চেয়ে বেশি দাম রাখলে তাৎক্ষণিকভাবে **'ভোক্তা অভিযোগ'** ট্যাবে গিয়ে অভিযোগ দাখিল করুন।")
+
+with tab5:
     st.markdown("## 🚨 ভোক্তা অধিকার ও দুর্নীতি অভিযোগ ব্যবস্থাপনা")
     with st.form("complaint_form_fixed"):
         c_shop = st.text_input("দোকানের নাম ও ঠিকানা:")
         c_area = st.selectbox("এলাকা:", ["বোদা", "পঞ্চগড়", "ময়দানদীঘি", "ঠাকুরগাঁও"], key="comp_area_fixed")
-        c_desc = st.text_area("অভিযোগের বিবরণ:", height=120)
+        c_desc = st.text_area("অভিযোগের বিবরণ (যেমন: অধিক মূল্য রাখা বা মেয়াদোত্তীর্ণ পণ্য):", height=120)
         submitted = st.form_submit_button("🚨 সরকারি প্যানেলে অভিযোগ সাবমিট করুন", type="primary")
 
         if submitted and c_shop and c_desc:
@@ -165,7 +185,7 @@ with tab4:
             st.balloons()
             st.success("✅ অভিযোগ সফলভাবে সরকারি ড্যাশবোর্ডে প্রেরণ করা হয়েছে!")
 
-with tab5:
+with tab6:
     st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও লাইফস্টাইল মডিউল")
     col_h1, col_h2 = st.columns(2)
     with col_h1:
@@ -185,13 +205,12 @@ with tab5:
             else:
                 st.warning("রক্তচাপ স্বাভাবিকের চেয়ে বেশি/কম ⚠️")
 
-with tab6:
+with tab7:
     st.markdown("## 🏛️ সরকারি কর্মকর্তা ও এডমিন লগইন প্যানেল")
     st.info("এই ট্যাবটি শুধুমাত্র জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের অনুমোদিত কর্মকর্তাদের জন্য সংরক্ষিত।")
     
     officer_pass = st.text_input("অফিসার সিক্রেট পাসওয়ার্ড প্রবেশ করান:", type="password", key="admin_secret_key")
     
-    # বিজ্ঞান মেলায় প্রদর্শনের সুবিধার জন্য পাসওয়ার্ড 'admin123' অথবা ফাঁকা রাখলেও ওপেন হবে (মেলার জন্য সুবিধাজনক)
     if officer_pass == "admin123" or officer_pass == "9999":
         st.success("✅ লগইন সফল হয়েছে! সরকারি ড্যাশবোর্ড সক্রিয়।")
         
@@ -220,7 +239,7 @@ with tab6:
                     </div>
                     """, unsafe_allow_html=True)
             else:
-                st.info("📭 বর্তমানে কোনো নতুন অভিযোগ জমা নেই। সাধারণ ইউজার ট্যাব থেকে অভিযোগ করলে এখানে সাথে সাথে দেখাবে।")
+                st.info("📭 বর্তমানে কোনো নতুন অভিযোগ জমা নেই।")
         else:
             st.info("📭 এখন পর্যন্ত কোনো অভিযোগ জমা হয়নি।")
     else:
@@ -229,7 +248,7 @@ with tab6:
 st.markdown("---")
 st.markdown("""
 <div style="text-align:center;padding:1.2rem;background:linear-gradient(135deg,#0f3460,#1a1a2e);border-radius:14px;color:white;">
-    <strong>🛡️ মানব সাথি ১.০ (স্মার্ট শপ ফাইন্ডার ও গভঃ ড্যাশবোর্ড)</strong><br>
+    <strong>🛡️ মানব সাথি ১.০ (স্মার্ট শপ ফাইন্ডার, প্রাইজ মনিটরিং ও গভঃ ড্যাশবোর্ড)</strong><br>
     <small>Created by Kaliagonj Naziraton High School (SOUNDARJYA)</small>
 </div>
 """, unsafe_allow_html=True)
