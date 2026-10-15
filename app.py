@@ -28,6 +28,7 @@ st.markdown("""
 .herbal-card { background: #f0fff4; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 5px solid #27ae60; border: 1px solid #c6efce; }
 .herbal-card h4 { margin: 0 0 6px 0; color: #1e8449; }
 .herbal-card p { margin: 2px 0; color: #2c3e50 !important; font-size: 0.95rem; }
+.distance-badge { background: #e8f4f8; color: #2980b9; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; display: inline-block; margin-top: 5px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -47,13 +48,13 @@ st.markdown("""
 <div class="app-header">
     <div style="font-size:3rem;">🛡️</div>
     <div class="app-title">মানব সাথি</div>
-    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক দোকান ফাইন্ডার, প্রাইজ মনিটরিং ও স্বাস্থ্য সঙ্গী</div>
+    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক দোকান ফাইন্ডার, দূরত্ব নেভিগেশন ও গভঃ ড্যাশবোর্ড</div>
     <div style="color:#f1c40f; font-size:0.9rem; margin-top:0.4rem;">Created by Kaliagonj Naziraton High School (SOUNDARJYA)</div>
 </div>
 """, unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "🔍 পণ্য ও লাইভ ম্যাপ",
+    "🔍 পণ্য, দোকান ও দূরত্ব ম্যাপ",
     "🗺️ জোন ম্যাপ",
     "📋 ৩২০ দোকানের তালিকা",
     "📊 বাজার দর তুলনা",
@@ -63,8 +64,8 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
 ])
 
 with tab1:
-    st.markdown("## 🔍 সুনির্দিষ্ট এলাকা ও পণ্যভিত্তিক দোকান এবং লোকেশন ম্যাপ")
-    st.info("নিচে থেকে আপনার **এলাকা** এবং কাঙ্ক্ষিত **পণ্য** সিলেক্ট করুন। নির্বাচিত পণ্যের সব ইনফরমেশন দেখানোর পাশাপাশি নিচের ম্যাপে দোকানগুলোর লোকেশন পিন পয়েন্ট করে দেখানো হবে।")
+    st.markdown("## 🔍 সুনির্দিষ্ট এলাকা, পণ্যভিত্তিক দোকান এবং দূরত্ব হিসাব")
+    st.info("নিচে থেকে আপনার **এলাকা** এবং কাঙ্ক্ষিত **পণ্য** সিলেক্ট করুন। নির্বাচিত পণ্যটি যে যে দোকানে আছে, আপনার অবস্থান থেকে দোকানটির আনুমানিক **দূরত্ব** নিচে দেখাবে।")
     
     if df_mapping is not None:
         all_areas = sorted(df_mapping['এলাকা'].dropna().unique().tolist())
@@ -86,14 +87,27 @@ with tab1:
         if len(result_df) > 0:
             np.random.seed(100)
             base_lat, base_lon = 25.85, 88.60
-            result_df['lat'] = base_lat + np.random.uniform(-0.03, 0.03, len(result_df))
-            result_df['lon'] = base_lon + np.random.uniform(-0.03, 0.03, len(result_df))
+            
+            # Simulated Lat/Lon and distance from user (base location)
+            lats = base_lat + np.random.uniform(-0.03, 0.03, len(result_df))
+            lons = base_lon + np.random.uniform(-0.03, 0.03, len(result_df))
+            
+            result_df['lat'] = lats
+            result_df['lon'] = lons
+            
+            # Approximate Distance calculation in KM from base point
+            distances = np.sqrt((lats - base_lat)**2 + (lons - base_lon)**2) * 111.0
+            result_df['distance_km'] = np.round(distances, 2)
 
             st.markdown("#### 🗺️ সার্চকৃত দোকানগুলোর ভার্চুয়াল ম্যাপ লোকেশন:")
             st.map(result_df, latitude='lat', longitude='lon', size=40, color='#e94560')
 
-            st.markdown("#### 🏪 দোকানসমূহের পূর্ণাঙ্গ বিবরণ:")
+            st.markdown("#### 🏪 দোকানসমূহের পূর্ণাঙ্গ বিবরণ ও দূরত্ব:")
             for idx, row in result_df.iterrows():
+                dist = row['distance_km']
+                dist_str = f"{int(dist*1000)} মিটার" if dist < 1.0 else f"{dist:.1f} কিমি"
+                walk_time = int(dist * 12) + 1  # Approximate walking time
+                
                 st.markdown(f"""
                 <div class="result-card">
                     <h3 style="margin:0; color:#0f3460;">🏪 {row['দোকানের নাম']} <span style="font-size:0.8rem; color:#e94560; float:right;">আইডি: {row['দোকান আইডি']}</span></h3>
@@ -103,8 +117,10 @@ with tab1:
                     <p style="margin:4px 0;">📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
                     <p style="margin:4px 0;">🏙️ <strong>এলাকা:</strong> {row['এলাকা']} | 📂 <strong>ক্যাটাগরি:</strong> {row['ক্যাটাগরি']}</p>
                     <p style="margin:4px 0;">📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
-                    <div style="margin-top:10px;">
-                        <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600;">🟢 স্টকে উপলব্ধ</span>
+                    
+                    <div style="margin-top:8px;">
+                        <span class="distance-badge">📏 আপনার অবস্থান থেকে দূরত্ব: <strong>{dist_str}</strong> (আনুমানিক {walk_time} মিনিট হাঁটার পথ)</span>
+                        <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600; margin-left:10px;">🟢 স্টকে উপলব্ধ</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -189,8 +205,6 @@ with tab5:
 
 with tab6:
     st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও ১৫+ নিত্যদিনের রোগের ভেষজ ঘরোয়া চিকিৎসা")
-    
-    # BMI & BP Section
     col_h1, col_h2 = st.columns(2)
     with col_h1:
         st.markdown("### ⚖️ BMI ক্যালকুলেটর")
@@ -210,7 +224,7 @@ with tab6:
                 st.warning("রক্তচাপ স্বাভাবিকের চেয়ে বেশি/কম ⚠️")
 
     st.markdown("---")
-    st.markdown("### 🌿 সাধারণ ১৫+ টি রোগের ভেষজ ও প্রাকৃতি সমাধান নির্দেশিকা")
+    st.markdown("### 🌿 সাধারণ ১৫+ টি রোগের ভেষজ ও প্রাকৃতিক সমাধান নির্দেশিকা")
     
     herbal_remedies = [
         {"disease": "১. সর্দি, কাশি ও গলার খুশখুশ", "remedy": "তুলসী পাতার রস, আদা ও মধু একসাথে মিশিয়ে হালকা গরম করে দিনে ২-৩ বার পান করুন।", "herb": "তুলসী, আদা, মধু"},
