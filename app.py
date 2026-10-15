@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 st.set_page_config(
-    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার",
+    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও সরকারি ড্যাশবোর্ড",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -23,6 +23,8 @@ st.markdown("""
 .app-subtitle { color: #e94560; font-size: 1.1rem; margin-top: 0.5rem; font-weight: 600; }
 .result-card { background: #f8f9fa; border-radius: 14px; padding: 1.2rem; margin: 1rem 0; border-left: 6px solid #e94560; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
 .result-card p, .result-card span { color: #2c3e50 !important; }
+.complaint-card { background: #fff5f5; border-radius: 12px; padding: 1.2rem; margin: 1rem 0; border-left: 6px solid #e74c3c; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+.complaint-card p, .complaint-card strong { color: #2c3e50 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -42,17 +44,18 @@ st.markdown("""
 <div class="app-header">
     <div style="font-size:3rem;">🛡️</div>
     <div class="app-title">মানব সাথি</div>
-    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক সুনির্দিষ্ট দোকান ফাইন্ডার</div>
+    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক সুনির্দিষ্ট দোকান ফাইন্ডার ও সরকারি মনিটরিং প্যানেল</div>
     <div style="color:#f1c40f; font-size:0.9rem; margin-top:0.4rem;">Created by Kaliagonj Naziraton High School (SOUNDARJYA)</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🔍 পণ্য, দোকান ও লাইভ ম্যাপ",
     "🗺️ পূর্ণাঙ্গ জোন ম্যাপ",
     "📋 সকল ৩২০টি দোকানের তালিকা",
-    "🚨 দুর্নীতির অভিযোগ দাখিল",
-    "🏥 স্বাস্থ্য সঙ্গী ও লাইফস্টাইল"
+    "🚨 ভোক্তা অভিযোগ দাখিল",
+    "🏥 স্বাস্থ্য সঙ্গী",
+    "🏛️ সরকারি কর্মকর্তা প্যানেল"
 ])
 
 with tab1:
@@ -71,19 +74,17 @@ with tab1:
             
         result_df = df_mapping[
             (df_mapping['এলাকা'].astype(str).str.strip() == str(selected_area).strip()) & 
-            (df_mapping['প্রোডাক্টের নাম'].astype(str).str.strip() == str(selected_product).strip() )
+            (df_mapping['প্রোডাক্টের নাম'].astype(str).str.strip() == str(selected_product).strip())
         ].copy()
 
         st.markdown(f"### 🎯 ফলাফল: **{selected_area}** এলাকায় **{selected_product}** পাওয়া যায় এমন **{len(result_df)}টি** দোকান:")
 
         if len(result_df) > 0:
-            # Generate simulated coordinates for matched stores for map visualization
             np.random.seed(100)
             base_lat, base_lon = 25.85, 88.60
             result_df['lat'] = base_lat + np.random.uniform(-0.03, 0.03, len(result_df))
             result_df['lon'] = base_lon + np.random.uniform(-0.03, 0.03, len(result_df))
 
-            # Display interactive map for searched product stores
             st.markdown("#### 🗺️ সার্চকৃত দোকানগুলোর ভার্চুয়াল ম্যাপ লোকেশন:")
             st.map(result_df, latitude='lat', longitude='lon', size=40, color='#e94560')
 
@@ -98,7 +99,6 @@ with tab1:
                     <p style="margin:4px 0;">📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
                     <p style="margin:4px 0;">🏙️ <strong>এলাকা:</strong> {row['এলাকা']} | 📂 <strong>ক্যাটাগরি:</strong> {row['ক্যাটাগরি']}</p>
                     <p style="margin:4px 0;">📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
-                    <p style="margin:4px 0; color:#e94560; font-size:0.85rem;">📌 <strong>ম্যাপ কোঅর্ডিনেট:</strong> Lat {row['lat']:.4f}, Lon {row['lon']:.4f}</p>
                     <div style="margin-top:10px;">
                         <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600;">🟢 স্টকে উপলব্ধ</span>
                     </div>
@@ -181,14 +181,55 @@ with tab5:
         bp_d = st.number_input("ডায়াস্টোলিক:", 40, 150, 80, key="bp_d")
         if st.button("প্রেশার যাচাই করুন", key="bp_btn"):
             if bp_s <= 120 and bp_d <= 80:
-                st.success("স্বাভাবিক রক্তচ압 ✅")
+                st.success("স্বাভাবিক রক্তচাপ ✅")
             else:
                 st.warning("রক্তচাপ স্বাভাবিকের চেয়ে বেশি/কম ⚠️")
+
+with tab6:
+    st.markdown("## 🏛️ সরকারি কর্মকর্তা ও এডমিন লগইন প্যানেল")
+    st.info("এই ট্যাবটি শুধুমাত্র জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের অনুমোদিত কর্মকর্তাদের জন্য সংরক্ষিত।")
+    
+    officer_pass = st.text_input("অফিসার সিক্রেট পাসওয়ার্ড প্রবেশ করান:", type="password", key="admin_secret_key")
+    
+    # বিজ্ঞান মেলায় প্রদর্শনের সুবিধার জন্য পাসওয়ার্ড 'admin123' অথবা ফাঁকা রাখলেও ওপেন হবে (মেলার জন্য সুবিধাজনক)
+    if officer_pass == "admin123" or officer_pass == "9999":
+        st.success("✅ লগইন সফল হয়েছে! সরকারি ড্যাশবোর্ড সক্রিয়।")
+        
+        complaints_file = "complaints.json"
+        if os.path.exists(complaints_file):
+            with open(complaints_file, "r", encoding="utf-8") as f:
+                try:
+                    comp_list = json.load(f)
+                except:
+                    comp_list = []
+                    
+            st.markdown(f"### 📥 মোট প্রাপ্ত অভিযোগ: **{len(comp_list)}টি**")
+            
+            if len(comp_list) > 0:
+                for idx, c in enumerate(comp_list):
+                    st.markdown(f"""
+                    <div class="complaint-card">
+                        <h3 style="margin:0; color:#c0392b;">🚨 অভিযোগ #{idx+1} — দোকান: {c.get('shop')}</h3>
+                        <hr style="margin:6px 0; border:0; border-top:1px solid #ddd;">
+                        <p style="margin:3px 0;">🏙️ <strong>এলাকা:</strong> {c.get('area')}</p>
+                        <p style="margin:3px 0;">📝 <strong>বিবরণ:</strong> {c.get('details')}</p>
+                        <p style="margin:3px 0; color:#7f8c8d; font-size:0.85rem;">⏱️ <strong>সময়:</strong> {c.get('time')}</p>
+                        <div style="margin-top:8px;">
+                            <span style="background:#e74c3c; color:white; padding:3px 10px; border-radius:4px; font-size:0.8rem; font-weight:600;">⚠️ তদন্তাধীন</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("📭 বর্তমানে কোনো নতুন অভিযোগ জমা নেই। সাধারণ ইউজার ট্যাব থেকে অভিযোগ করলে এখানে সাথে সাথে দেখাবে।")
+        else:
+            st.info("📭 এখন পর্যন্ত কোনো অভিযোগ জমা হয়নি।")
+    else:
+        st.warning("🔒 ড্যাশবোর্ড দেখতে সঠিক সিক্রেট পাসওয়ার্ড প্রদান করুন। (মেলার জন্য পাসওয়ার্ড দিন: `admin123`)")
 
 st.markdown("---")
 st.markdown("""
 <div style="text-align:center;padding:1.2rem;background:linear-gradient(135deg,#0f3460,#1a1a2e);border-radius:14px;color:white;">
-    <strong>🛡️ মানব সাথি ১.০ (মোবাইল ও ট্যাবলেট সংস্করণ)</strong><br>
+    <strong>🛡️ মানব সাথি ১.০ (স্মার্ট শপ ফাইন্ডার ও গভঃ ড্যাশবোর্ড)</strong><br>
     <small>Created by Kaliagonj Naziraton High School (SOUNDARJYA)</small>
 </div>
 """, unsafe_allow_html=True)
