@@ -46,8 +46,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "🔍 পণ্য ও দোকান খুঁজুন",
+    "🗺️ কাল্পনিক ভার্চুয়াল জোন ম্যাপ",
     "📋 সকল ৩২০টি দোকানের তালিকা",
     "🚨 দুর্নীতির অভিযোগ দাখিল",
     "🏥 স্বাস্থ্য সঙ্গী ও লাইফস্টাইল"
@@ -96,6 +97,38 @@ with tab1:
         st.error("⚠️ ডাটাবেজ ফাইল পাওয়া যায়নি।")
 
 with tab2:
+    st.markdown("## 🗺️ কাল্পনিক ভার্চুয়াল জোন ও দোকান লোকেশন ম্যাপ")
+    st.info("বিজ্ঞান মেলা প্রদর্শনের জন্য তৈরি কাল্পনিক ডিজিটাল জোন ম্যাপ, যেখানে প্রতিটি দোকানের সুনির্দিষ্ট কাল্পনিক পজিশন ও কোঅর্ডিনেট পিন করা আছে।")
+    
+    if df_stores is not None:
+        map_area = st.selectbox("এলাকা সিলেক্ট করুন (ভার্চুয়াল ম্যাপ দেখতে):", sorted(df_stores['এলাকা'].dropna().unique()), key="virtual_map_area")
+        area_stores = df_stores[df_stores['এলাকা'] == map_area].copy()
+        
+        # Generating simulated virtual coordinates (latitude/longitude around a base point for the area)
+        import numpy as np
+        np.random.seed(42) # Stable random coordinates for each store
+        base_lat, base_lon = 25.85, 88.60
+        area_stores['lat'] = base_lat + np.random.uniform(-0.05, 0.05, len(area_stores))
+        area_stores['lon'] = base_lon + np.random.uniform(-0.05, 0.05, len(area_stores))
+        
+        st.markdown(f"### 📍 **{map_area}** জোন ম্যাপে দোকানের অবস্থান ({len(area_stores)}টি দোকান চিহ্নিত)")
+        
+        # Displaying Streamlit interactive map
+        st.map(area_stores, latitude='lat', longitude='lon', size=30, color='#e94560')
+        
+        st.markdown("### 🏪 নির্বাচিত এলাকার দোকানসমূহের ভার্চুয়াল লোকেশন বিবরণ:")
+        for idx, row in area_stores.iterrows():
+            st.markdown(f"""
+            <div style="background:#f8f9fa; border-left:4px solid #0f3460; padding:10px; border-radius:8px; margin-bottom:8px;">
+                <strong>🏪 {row['দোকানের নাম']}</strong> (আইডি: {row.get('দোকান আইডি', 'N/A')})<br>
+                📍 ঠিকানা: {row['ঠিকানা']} | 📞 ফোন: {row['যোগাযোগ নম্বর']}<br>
+                <small style="color:#e94560;">📌 কাল্পনিক জোন কোঅর্ডিনেট: Lat {row['lat']:.4f}, Lon {row['lon']:.4f}</small>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ ম্যাপ ডাটা লোড করা যায়নি।")
+
+with tab3:
     st.markdown("## 📋 সকল ৩২০টি দোকানের পূর্ণাঙ্গ তালিকা")
     if df_stores is not None:
         area_filter = st.selectbox("এলাকা অনুযায়ী ফিল্টার করুন:", ["সব এলাকা"] + list(df_stores['এলাকা'].dropna().unique()), key="store_filter_area")
@@ -106,7 +139,7 @@ with tab2:
     else:
         st.error("⚠️ স্টোর ডাটাবেজ ফাইল পাওয়া যায়নি।")
 
-with tab3:
+with tab4:
     st.markdown("## 🚨 ভোক্তা অধিকার ও দুর্নীতি অভিযোগ ব্যবস্থাপনা")
     with st.form("complaint_form_fixed"):
         c_shop = st.text_input("দোকানের নাম ও ঠিকানা:")
@@ -134,7 +167,7 @@ with tab3:
             st.balloons()
             st.success("✅ অভিযোগ সফলভাবে সরকারি ড্যাশবোর্ডে প্রেরণ করা হয়েছে!")
 
-with tab4:
+with tab5:
     st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও লাইফস্টাইল মডিউল")
     col_h1, col_h2 = st.columns(2)
     with col_h1:
@@ -156,7 +189,7 @@ with tab4:
 
 st.markdown("---")
 st.markdown("""
-<div style="text-align:center;padding:1.2rem;background:linear-gradient(135deg,#0f3460,#1a1a2e);border-radius:14px;color:white;">
+<div style="text-align:center;padding:1.2rem;background:linear-gradient(135deg,#0f3460,#1a1a2e);der-radius:14px;color:white;">
     <strong>🛡️ মানব সাথি ১.০ (মোবাইল ও ট্যাবলেট সংস্করণ)</strong><br>
     <small>Created by Kaliagonj Naziraton High School (SOUNDARJYA)</small>
 </div>
