@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 st.set_page_config(
-    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও বাজার মনিটরিং",
+    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও স্বাস্থ্য সঙ্গী",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -25,6 +25,9 @@ st.markdown("""
 .result-card p, .result-card span { color: #2c3e50 !important; }
 .complaint-card { background: #fff5f5; border-radius: 12px; padding: 1.2rem; margin: 1rem 0; border-left: 6px solid #e74c3c; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
 .complaint-card p, .complaint-card strong { color: #2c3e50 !important; }
+.herbal-card { background: #f0fff4; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 5px solid #27ae60; border: 1px solid #c6efce; }
+.herbal-card h4 { margin: 0 0 6px 0; color: #1e8449; }
+.herbal-card p { margin: 2px 0; color: #2c3e50 !important; font-size: 0.95rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -44,7 +47,7 @@ st.markdown("""
 <div class="app-header">
     <div style="font-size:3rem;">🛡️</div>
     <div class="app-title">মানব সাথি</div>
-    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক দোকান ফাইন্ডার, প্রাইজ মনিটরিং ও গভঃ ড্যাশবোর্ড</div>
+    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক দোকান ফাইন্ডার, প্রাইজ মনিটরিং ও স্বাস্থ্য সঙ্গী</div>
     <div style="color:#f1c40f; font-size:0.9rem; margin-top:0.4rem;">Created by Kaliagonj Naziraton High School (SOUNDARJYA)</div>
 </div>
 """, unsafe_allow_html=True)
@@ -55,7 +58,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📋 ৩২০ দোকানের তালিকা",
     "📊 বাজার দর তুলনা",
     "🚨 ভোক্তা অভিযোগ",
-    "🏥 স্বাস্থ্য সঙ্গী",
+    "🏥 স্বাস্থ্য সঙ্গী ও ভেষজ",
     "🏛️ কর্মকর্তা প্যানেল"
 ])
 
@@ -142,12 +145,11 @@ with tab4:
     st.markdown("## 📊 বাজার দর তুলনা ও প্রাইজ মনিটরিং ট্র্যাকার")
     st.info("জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের নির্ধারিত মূল্য তালিকার সাথে খুচরা বাজারের বর্তমান দামের রিয়েল-টাইম তুলনা।")
     
-    # Sample price monitoring data
     price_data = [
         {"product": "নাজিরশাইল চাল (কেজি)", "gov_price": "৬৮-৭০ টাকা", "market_price": "৭২ টাকা", "status": "⚠️ অতিরিক্ত মূল্য"},
         {"product": "সয়াবিন তেল (লিটার)", "gov_price": "১৭৫ টাকা", "market_price": "১৭৫ টাকা", "status": "✅ ন্যায্য মূল্য"},
         {"product": "মসুর ডাল (দেশি কেজি)", "gov_price": "১৪০ টাকা", "market_price": "১৪৫ টাকা", "status": "⚠️ সামান্য বেশি"},
-        {"product": "বোতলজাত পানি (১ লিটার)", "\}}", "gov_price": "২০ টাকা", "market_price": "২০ টাকা", "status": "✅ ন্যায্য মূল্য"},
+        {"product": "বোতলজাত পানি (১ লিটার)", "gov_price": "২০ টাকা", "market_price": "২০ টাকা", "status": "✅ ন্যায্য মূল্য"},
         {"product": "চিনি (খোলা কেজি)", "gov_price": "১৩৫ টাকা", "market_price": "১৪০ টাকা", "status": "⚠️ অতিরিক্ত মূল্য"},
         {"product": "ময়দা (প্যাকেট কেজি)", "gov_price": "৬৫ টাকা", "market_price": "৬৫ টাকা", "status": "✅ ন্যায্য মূল্য"}
     ]
@@ -186,7 +188,9 @@ with tab5:
             st.success("✅ অভিযোগ সফলভাবে সরকারি ড্যাশবোর্ডে প্রেরণ করা হয়েছে!")
 
 with tab6:
-    st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও লাইফস্টাইল মডিউল")
+    st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও ১৫+ নিত্যদিনের রোগের ভেষজ ঘরোয়া চিকিৎসা")
+    
+    # BMI & BP Section
     col_h1, col_h2 = st.columns(2)
     with col_h1:
         st.markdown("### ⚖️ BMI ক্যালকুলেটর")
@@ -204,6 +208,41 @@ with tab6:
                 st.success("স্বাভাবিক রক্তচাপ ✅")
             else:
                 st.warning("রক্তচাপ স্বাভাবিকের চেয়ে বেশি/কম ⚠️")
+
+    st.markdown("---")
+    st.markdown("### 🌿 সাধারণ ১৫+ টি রোগের ভেষজ ও প্রাকৃতি সমাধান নির্দেশিকা")
+    
+    herbal_remedies = [
+        {"disease": "১. সর্দি, কাশি ও গলার খুশখুশ", "remedy": "তুলসী পাতার রস, আদা ও মধু একসাথে মিশিয়ে হালকা গরম করে দিনে ২-৩ বার পান করুন।", "herb": "তুলসী, আদা, মধু"},
+        {"disease": "২. গ্যাস্ট্রিক ও অ্যাসিডিটি", "remedy": "খাওয়ার পর ১ চামচ মৌরি অথবা ইসবগুলের ভুষি পানিতে ভিজিয়ে পান করুন। কাঁচা লবঙ্গ চিবিয়ে খেলেও দ্রুত আরাম মেলে।", "herb": "মৌরি, লবঙ্গ, ইসবগুল"},
+        {"disease": "৩. বদহজম ও পেট ফাঁপা", "remedy": "এক গ্লাস ঈষদুষ্ণ পানিতে সামান্য জোয়ান গুঁড়ো ও বিট লবণ মিশিয়ে খেলে পেটের অস্বস্তি দূর হয়।", "herb": "জোয়ান, বিট লবণ"},
+        {"disease": "৪. সাধারণ মাথাব্যথা", "remedy": "মাথায় পুদিনা পাতা বা আদার রস হালকা করে ম্যাসাজ করুন এবং আদা চা পান করুন।", "herb": "পুদিনা পাতা, আদা"},
+        {"disease": "৫. কোষ্ঠকাঠিন্য", "remedy": "রাতে ঘুমানোর আগে এক গ্লাস হালকা গরম পানিতে ১-২ চামচ ইসবগুলের ভুষি বা ত্রফলা গুঁড়ো মিশিয়ে পান করুন।", "herb": "ত্রফলা, ইসবগুল"},
+        {"disease": "৬. মানসিক চাপ ও অনিদ্রা", "remedy": "ঘুমানোর আগে এক কাপ গরম দুধের সাথে সামান্য জয়ফল গুঁড়ো অথবা ক্যামোমাইল চা পান করুন।", "herb": "জয়ফল, ক্যামোমাইল"},
+        {"disease": "৭. দাঁত ও মাড়ির ব্যথা", "remedy": "আক্রান্ত দাঁতের গোড়ায় একটি লবঙ্গ চেপে রাখুন অথবা লবঙ্গের তেল তুলো দিয়ে লাগান।", "herb": "লবঙ্গ"},
+        {"disease": "৮. উচ্চ রক্তচাপ নিয়ন্ত্রণ", "remedy": "প্রতিদিন সকালে খালি পেটে ১-২ কোয়া কাঁচা রসুন খেলে রক্তচাপ ও কোলেস্টেরল নিয়ন্ত্রণে থাকে।", "herb": "রসুন"},
+        {"disease": "৯. মেদ ও ওজন কমানো", "remedy": "সকালে খালি পেটে এক গ্লাস হালকা গরম পানিতে অর্ধেকটা লেবুর রস ও ১ চামচ মধু মিশিয়ে পান করুন।", "herb": "লেবু, মধু"},
+        {"disease": "১০. কৃমির সমস্যা", "remedy": "সকালে খালি পেটে কালমেঘ পাতার রস অথবা কাঁচা পেঁপের আঠা পানির সাথে মিশিয়ে খেলে কৃমি দূর হয়।", "herb": "কালমেঘ পাতা, পেঁপে"},
+        {"disease": "১১. চর্মরোগ ও চুলকানি", "remedy": "কাঁচা হলুদ ও নিম পাতা বেটে আক্রান্ত স্থানে লাগালে যে কোনো ব্যাকটেরিয়া বা ফাঙ্গাল ইনফেকশন দূর হয়।", "herb": "নিম পাতা, হলুদ"},
+        {"disease": "১২. প্রস্রাবের জ্বালাপোড়া", "remedy": "ধনে বীজ সারারাত পানিতে ভিজিয়ে রেখে সকালে সেই পানি ছেঁকে খেলে বা ডাবের পানি পান করলে দ্রুত আরাম মেলে।", "herb": "ধনে বীজ, ডাবের পানি"},
+        {"disease": "১৩. চুল পড়া রোধ ও ড্যান্ড্রফ", "remedy": "আমলকী ও রিঠা গুঁড়ো পানিতে ফুটিয়ে সেই পানি দিয়ে চুল ধুলে চুল পড়া বন্ধ হয় এবং গোড়া শক্ত হয়।", "herb": "আমলকী, রিঠা"},
+        {"disease": "১৪. রক্তস্বল্পতা (অ্যানিমিয়া)", "remedy": "প্রতিদিন কুল, ডালিম, খুরমা খেজুর এবং পালং শাক খেলে রক্তে হিমোগ্লোবিন দ্রুত বাড়ে।", "herb": "ডালিম, খেজুর, পালং শাক"},
+        {"disease": "১৫. মুখের দুর্গন্ধ", "remedy": "খাওয়ার পর দারুচিনি বা এলাচ চিবিয়ে খেলে মুখের দুর্গন্ধ সৃষ্টিকারী ব্যাকটেরিয়া ধ্বংস হয়।", "herb": "দারুচিনি, এলাচ"}
+    ]
+    
+    col_search, _ = st.columns([2, 1])
+    with col_search:
+        search_disease = st.text_input("🔍 কোনো নির্দিষ্ট রোগ বা ভেষজ উপাদান খুঁজুন:", placeholder="যেমন: গ্যাস্ট্রিক, কাশি, নিম পাতা...")
+
+    for item in herbal_remedies:
+        if search_disease == "" or (search_disease.lower() in item['disease'].lower() or search_disease.lower() in item['herb'].lower()):
+            st.markdown(f"""
+            <div class="herbal-card">
+                <h4>{item['disease']}</h4>
+                <p>🌿 <strong>প্রধান ভেষজ উপাদান:</strong> {item['herb']}</p>
+                <p>💡 <strong>ঘরোয়া প্রস্তুতপ্রণালী:</strong> {item['remedy']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
 with tab7:
     st.markdown("## 🏛️ সরকারি কর্মকর্তা ও এডমিন লগইন প্যানেল")
