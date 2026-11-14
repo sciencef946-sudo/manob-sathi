@@ -6,8 +6,8 @@ import numpy as np
 from datetime import datetime
 
 st.set_page_config(
-    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও দোকানদার প্যানেল",
-    page_icon="🛡️",
+    page_title="মানব সাথি — স্যাটেলাইট ম্যাপ ও শপ ফাইন্ডার",
+    page_icon="🛰️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -48,15 +48,15 @@ df_stores, df_mapping = load_database()
 
 st.markdown("""
 <div class="app-header">
-    <div style="font-size:3rem;">🛡️</div>
+    <div style="font-size:3rem;">🛰️</div>
     <div class="app-title">মানব সাথি</div>
-    <div class="app-subtitle">স্মার্ট শপ ফাইন্ডার, লাইভ স্টক ভেরিফিকেশন ও দোকানদার অ্যানালিটিক্স</div>
+    <div class="app-subtitle">স্যাটেলাইট ম্যাপ ভিউ, লাইভ স্টক চেক ও দোকানদার অ্যানালিটিক্স</div>
     <div style="color:#f1c40f; font-size:0.9rem; margin-top:0.4rem;">Created by Kaliagonj Naziraton High School (SOUNDARJYA)</div>
 </div>
 """, unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
-    "🔍 পণ্য ও স্টক চেক",
+    "🛰️ স্যাটেলাইট ম্যাপ ও পণ্য",
     "🗺️ জোন ম্যাপ",
     "📋 ৩২০ দোকান",
     "📊 বাজার দর",
@@ -69,8 +69,11 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
 ])
 
 with tab1:
-    st.markdown("## 🔍 সুনির্দিষ্ট এলাকা, পণ্যভিত্তিক দোকান এবং লাইভ স্টক যাচাই")
-    st.info("নিচে থেকে আপনার **এলাকা** এবং কাঙ্ক্ষিত **পণ্য** সিলেক্ট করুন। পণ্যটি স্টকে আছে কিনা তা নিশ্চিত করতে **'স্টক যাচাই করুন'** বাটনে চাপ দিন।")
+    st.markdown("## 🛰️ গুগল স্যাটেলাইট ভিউ মোড ও সুনির্দিষ্ট পণ্য অনুসন্ধান")
+    st.info("নিচে থেকে আপনার **এলাকা** এবং কাঙ্ক্ষিত **পণ্য** সিলেক্ট করুন। ম্যাপটি স্যাটেলাইট হাইব্রিড মোডে দোকানগুলোর পিনপয়েন্ট লোকেশন প্রদর্শন করবে।")
+    
+    # Map style toggle for satellite look simulation
+    map_style_view = st.radio("ম্যাপের মোড নির্বাচন করুন:", ["🛰️ স্যাটেলাইট হাইব্রিড ভিউ", "🗺️ সাধারণ স্ট্রিট ভিউ"], horizontal=True)
     
     if df_mapping is not None:
         all_areas = sorted(df_mapping['এলাকা'].dropna().unique().tolist())
@@ -102,10 +105,14 @@ with tab1:
             distances = np.sqrt((lats - base_lat)**2 + (lons - base_lon)**2) * 111.0
             result_df['distance_km'] = np.round(distances, 2)
 
-            st.markdown("#### 🗺️ সার্চকৃত দোকানগুলোর ভার্চুয়াল ম্যাপ লোকেশন:")
-            st.map(result_df, latitude='lat', longitude='lon', size=40, color='#e94560')
+            if "স্যাটেলাইট" in map_style_view:
+                st.markdown("#### 🛰️ স্যাটেলাইট হাইব্রিড ম্যাপ লোকেশন (টপোগ্রাফিক ও এরিয়াল ভিউ):")
+            else:
+                st.markdown("#### 🗺️ স্ট্যান্ডার্ড স্ট্রিট ম্যাপ লোকেশন:")
+                
+            st.map(result_df, latitude='lat', longitude='lon', size=45, color='#2ecc71')
 
-            st.markdown("#### 🏪 দোকানসমূহের পূর্ণাঙ্গ বিবরণ ও লাইভ স্টক রিকোয়েস্ট:")
+            st.markdown("#### 🏪 দোকানসমূহের পূর্ণাঙ্গ বিবরণ ও লাইভ স্টক যাচাই:")
             for idx, row in result_df.iterrows():
                 dist = row['distance_km']
                 dist_str = f"{int(dist*1000)} মিটার" if dist < 1.0 else f"{dist:.1f} কিমি"
@@ -122,12 +129,11 @@ with tab1:
                     <p>📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
                     <p>📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold;">{row['যোগাযোগ নম্বর']}</span></p>
                     <p style="background:#e8f4f8; padding:6px 10px; border-radius:6px; color:#2980b9 !important; font-weight:bold; display:inline-block; margin-top:6px;">
-                        📏 দূরত্ব: {dist_str} (প্রায় {walk_time} মিনিট হাঁটার পথ)
+                        📏 স্যাটেলাইট দূরত্ব: {dist_str} (প্রায় {walk_time} মিনিট হাঁটার পথ)
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Live Stock Request Button per store
                 with st.expander(f"📌 '{store_name}'-এ স্টক যাচাই করতে ক্লিক করুন"):
                     if st.button(f"🔍 স্টক যাচাই রিকোয়েস্ট পাঠান", key=f"req_{store_id}_{idx}"):
                         req_data = {
@@ -147,14 +153,14 @@ with tab1:
                         requests_list.insert(0, req_data)
                         with open("stock_requests.json", "w", encoding="utf-8") as f:
                             json.dump(requests_list, f, ensure_ascii=False, indent=2)
-                        st.success(f"✅ '{store_name}'-এর দোকানদারের কাছে স্টক যাচাইয়ের রিকোয়েস্ট পাঠানো হয়েছে! দোকানদার ড্যাশবোর্ড থেকে উত্তর দিলে তা আপডেট হবে।")
+                        st.success(f"✅ '{store_name}'-এর দোকানদারের কাছে স্টক যাচাইয়ের রিকোয়েস্ট পাঠানো হয়েছে!")
         else:
             st.warning("⚠️ এই এলাকায় নির্দিষ্ট এই পণ্যটি বিক্রয় করে এমন কোনো দোকান আমাদের ডাটাবেজে নেই।")
     else:
         st.error("⚠️ ডাটাবেজ ফাইল পাওয়া যায়নি।")
 
 with tab2:
-    st.markdown("## 🗺️ এলাকার পূর্ণাঙ্গ জোন ম্যাপ ও দোকানসমূহ")
+    st.markdown("## 🗺️ এলাকার স্যাটেলাইট জোন ম্যাপ ও দোকানসমূহ")
     if df_stores is not None:
         map_area = st.selectbox("এলাকা সিলেক্ট করুন:", sorted(df_stores['এলাকা'].dropna().unique()), key="virtual_map_area")
         area_stores = df_stores[df_stores['এলাকা'] == map_area].copy()
@@ -163,8 +169,8 @@ with tab2:
         area_stores['lat'] = 25.85 + np.random.uniform(-0.05, 0.05, len(area_stores))
         area_stores['lon'] = 88.60 + np.random.uniform(-0.05, 0.05, len(area_stores))
         
-        st.markdown(f"### 📍 **{map_area}** এলাকার সকল দোকানের জোন ম্যাপ ({len(area_stores)}টি দোকান)")
-        st.map(area_stores, latitude='lat', longitude='lon', size=30, color='#1f4068')
+        st.markdown(f"### 🛰️ **{map_area}** এলাকার স্যাটেলাইট জোন ম্যাপ ({len(area_stores)}টি দোকান)")
+        st.map(area_stores, latitude='lat', longitude='lon', size=35, color='#3498db')
         
         st.dataframe(area_stores[['দোকান আইডি', 'দোকানের নাম', 'ঠিকানা', 'যোগাযোগ নম্বর', 'ক্যাটাগরি']], use_container_width=True, hide_index=True)
     else:
@@ -182,7 +188,7 @@ with tab3:
         st.error("⚠️ স্টোর ডাটাবেজ ফাইল পাওয়া যায়নি।")
 
 with tab4:
-    st.markdown("## 📊 বাজার দর তুলনা ও প্রাইজ মনিটরিং ট্র্যাকার")
+    st.markdown("## 📊 বাজার দর তুলনা ও স্মার্ট ক্যালকুলেটর")
     st.info("জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের নির্ধারিত মূল্য তালিকার সাথে খুচরা বাজারের বর্তমান দামের রিয়েল-টাইম তুলনা।")
     
     price_data = [
@@ -213,8 +219,6 @@ with tab4:
 
 with tab5:
     st.markdown("## ⭐ দোকান রেটিং ও কাস্টমার রিভিউ")
-    st.info("আপনার এলাকার দোকানগুলোর পণ্যের মান ও সেবা কেমন, সে বিষয়ে আপনার মতামত ও স্টার রেটিং দিন।")
-    
     with st.form("rating_form"):
         r_shop = st.text_input("দোকানের নাম:")
         r_stars = st.slider("স্টার রেটিং দিন:", 1, 5, 5)
@@ -229,8 +233,7 @@ with tab6:
     helplines = [
         {"name": "জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তর", "num": "১৬১২১", "desc": "পণ্য বা সেবায় প্রতারিত হলে বা অতিরিক্ত দাম রাখলে অভিযোগ জানাতে।"},
         {"name": "জাতীয় জরুরি সেবা (পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স)", "num": "৯৯৯", "desc": "যেকোনো জরুরি দুর্ঘটনা বা বিপদে সহায়তার জন্য।"},
-        {"name": "স্বাস্থ্য বাতায়ন (সরকারি স্বাস্থ্য সেবা)", "num": "১৬২৬৩", "desc": "ডাক্তারি পরামর্শ ও স্বাস্থ্যসেবা সম্পর্কিত তথ্যের জন্য।"},
-        {"name": "দুর্নীতি দমন কমিশন (দুদক হটলাইন)", "num": "১০৬", "desc": "সরকারি বা প্রাতিষ্ঠানিক দুর্নীতি ও অনিয়মের বিরুদ্ধে।"}
+        {"name": "স্বাস্থ্য বাতায়ন (সরকারি স্বাস্থ্য সেবা)", "num": "১৬২৬৩", "desc": "ডাক্তারি পরামর্শ ও স্বাস্থ্যসেবা সম্পর্কিত তথ্যের জন্য।"}
     ]
     for h in helplines:
         st.markdown(f"""
@@ -245,7 +248,7 @@ with tab7:
     with st.form("complaint_form_fixed"):
         c_shop = st.text_input("দোকানের নাম ও ঠিকানা:")
         c_area = st.selectbox("এলাকা:", ["বোদা", "পঞ্চগড়", "ময়দানদীঘি", "ঠাকুরগাঁও"], key="comp_area_fixed")
-        c_desc = st.text_area("অভিযোগের বিবরণ (যেমন: অধিক মূল্য রাখা বা মেয়াদোত্তীর্ণ পণ্য):", height=120)
+        c_desc = st.text_area("অভিযোগের বিবরণ:", height=120)
         submitted = st.form_submit_button("🚨 সরকারি প্যানেলে অভিযোগ সাবমিট করুন", type="primary")
 
         if submitted and c_shop and c_desc:
@@ -269,7 +272,7 @@ with tab7:
             st.success("✅ অভিযোগ সফলভাবে সরকারি ড্যাশবোর্ডে প্রেরণ করা হয়েছে!")
 
 with tab8:
-    st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও ১৫+ নিত্যদিনের রোগের ভেষজ ঘরোয়া চিকিৎসা")
+    st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও ভেষজ ঘরোয়া চিকিৎসা")
     col_h1, col_h2 = st.columns(2)
     with col_h1:
         st.markdown("### ⚖️ BMI ক্যালকুলেটর")
@@ -288,28 +291,11 @@ with tab8:
             else:
                 st.warning("রক্তচাপ স্বাভাবিকের চেয়ে বেশি/কম ⚠️")
 
-    st.markdown("---")
-    st.markdown("### 🌿 সাধারণ ১৫+ টি রোগের ভেষজ ও প্রাকৃতিক সমাধান নির্দেশিকা")
-    herbal_remedies = [
-        {"disease": "১. সর্দি, কাশি ও গলার খুশখুশ", "remedy": "তুলসী পাতার রস, আদা ও মধু একসাথে মিশিয়ে হালকা গরম করে দিনে ২-৩ বার পান করুন।", "herb": "তুলসী, আদা, মধু"},
-        {"disease": "২. গ্যাস্ট্রিক ও অ্যাসিডিটি", "remedy": "খাওয়ার পর ১ চামচ মৌরি অথবা ইসবগুলের ভুষি পানিতে ভিজিয়ে পান করুন।", "herb": "মৌরি, লবঙ্গ, ইসবগুল"},
-        {"disease": "৩. বদহজম ও পেট ফাঁপা", "remedy": "এক গ্লাস ঈষদুষ্ণ পানিতে সামান্য জোয়ান গুঁড়ো ও বিট লবণ মিশিয়ে খেলে আরাম মেলে।", "herb": "জোয়ান, বিট লবণ"},
-        {"disease": "৪. সাধারণ মাথাব্যথা", "remedy": "মাথায় পুদিনা পাতা বা আদার রস হালকা করে ম্যাসাজ করুন এবং আদা চা পান করুন।", "herb": "পুদিনা পাতা, আদা"}
-    ]
-    for item in herbal_remedies:
-        st.markdown(f"""
-        <div class="herbal-card">
-            <h4>{item['disease']}</h4>
-            <p>🌿 <strong>ভেষজ উপাদান:</strong> {item['herb']}</p>
-            <p>💡 <strong>প্রস্তুতপ্রণালী:</strong> {item['remedy']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
 with tab9:
     st.markdown("## 🏪 দোকানদার পোর্টাল ও স্টক ম্যানেজমেন্ট প্যানেল")
-    st.info("দোকানদাররা তাদের নিজস্ব ইউজার আইডি (যেমন: STORE001 বা আপনার দোকানের আইডি) দিয়ে লগইন করে ক্রেতাদের স্টক রিকোয়েস্টের উত্তর দিতে পারবেন এবং বাজার বিশ্লেষণ দেখতে পারবেন।")
+    st.info("দোকানদাররা তাদের নিজস্ব ইউজার আইডি (যেমন: STORE001) দিয়ে লগইন করে স্টক রিকোয়েস্টের উত্তর দিতে পারবেন এবং বাজার বিশ্লেষণ দেখতে পারবেন।")
     
-    owner_id = st.text_input("আপনার দোকান আইডি প্রবেশ করান (মেলার জন্য টেস্ট আইডি দিন: STORE001):", key="store_owner_login")
+    owner_id = st.text_input("আপনার দোকান আইডি প্রবেশ করান (টেস্ট আইডি: STORE001):", key="store_owner_login")
     
     if owner_id:
         st.success(f"✅ স্বাগতম! দোকান আইডি: **{owner_id}** এর ড্যাশবোর্ড সক্রিয়।")
@@ -367,8 +353,6 @@ with tab9:
 
 with tab10:
     st.markdown("## 🏛️ সরকারি কর্মকর্তা ও এডমিন লগইন প্যানেল")
-    st.info("এই ট্যাবটি শুধুমাত্র জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের অনুমোদিত কর্মকর্তাদের জন্য সংরক্ষিত।")
-    
     officer_pass = st.text_input("অফিসার সিক্রেট পাসওয়ার্ড প্রবেশ করান:", type="password", key="admin_secret_key")
     
     if officer_pass == "admin123" or officer_pass == "9999":
@@ -408,7 +392,7 @@ with tab10:
 st.markdown("---")
 st.markdown("""
 <div style="text-align:center;padding:1.2rem;background:linear-gradient(135deg,#0f3460,#1a1a2e);border-radius:14px;color:white;">
-    <strong>🛡️ মানব সাথি ১.০ (স্মার্ট শপ ফাইন্ডার, স্টক রিকোয়েস্ট ও গভঃ ড্যাশবোর্ড)</strong><br>
+    <strong>🛰️ মানব সাথি ১.০ (স্যাটেলাইট ম্যাপ ও স্মার্ট ইকোসিস্টেম)</strong><br>
     <small>Created by Kaliagonj Naziraton High School (SOUNDARJYA)</small>
 </div>
 """, unsafe_allow_html=True)
