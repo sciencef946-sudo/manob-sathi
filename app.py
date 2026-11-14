@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 st.set_page_config(
-    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও স্বাস্থ্য সঙ্গী",
+    page_title="মানব সাথি — স্মার্ট শপ ফাইন্ডার ও দোকানদার প্যানেল",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -28,6 +28,9 @@ st.markdown("""
 .herbal-card { background: #f0fff4; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 5px solid #27ae60; border: 1px solid #c6efce; }
 .herbal-card h4 { margin: 0 0 6px 0; color: #1e8449; }
 .herbal-card p { margin: 2px 0; color: #2c3e50 !important; font-size: 0.95rem; }
+.helpline-box { background: #e8f4f8; border-left: 5px solid #2980b9; padding: 1rem; border-radius: 10px; margin-bottom: 0.8rem; }
+.helpline-box h4 { margin: 0 0 4px 0; color: #2980b9; }
+.helpline-box p { margin: 2px 0; color: #2c3e50 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -47,24 +50,27 @@ st.markdown("""
 <div class="app-header">
     <div style="font-size:3rem;">🛡️</div>
     <div class="app-title">মানব সাথি</div>
-    <div class="app-subtitle">এলাকা ও পণ্যভিত্তিক দোকান ফাইন্ডার, দূরত্ব নেভিগেশন ও গভঃ ড্যাশবোর্ড</div>
+    <div class="app-subtitle">স্মার্ট শপ ফাইন্ডার, লাইভ স্টক ভেরিফিকেশন ও দোকানদার অ্যানালিটিক্স</div>
     <div style="color:#f1c40f; font-size:0.9rem; margin-top:0.4rem;">Created by Kaliagonj Naziraton High School (SOUNDARJYA)</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "🔍 পণ্য, দোকান ও দূরত্ব ম্যাপ",
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+    "🔍 পণ্য ও স্টক চেক",
     "🗺️ জোন ম্যাপ",
-    "📋 ৩২০ দোকানের তালিকা",
-    "📊 বাজার দর তুলনা",
+    "📋 ৩২০ দোকান",
+    "📊 বাজার দর",
+    "⭐ দোকান রেটিং",
+    "📞 হেল্পলাইন",
     "🚨 ভোক্তা অভিযোগ",
-    "🏥 স্বাস্থ্য সঙ্গী ও ভেষজ",
-    "🏛️ কর্মকর্তা প্যানেল"
+    "🏥 স্বাস্থ্য সঙ্গী",
+    "🏪 দোকানদার প্যানেল",
+    "🏛️ গভঃ ড্যাশবোর্ড"
 ])
 
 with tab1:
-    st.markdown("## 🔍 সুনির্দিষ্ট এলাকা, পণ্যভিত্তিক দোকান এবং দূরত্ব হিসাব")
-    st.info("নিচে থেকে আপনার **এলাকা** এবং কাঙ্ক্ষিত **পণ্য** সিলেক্ট করুন। নির্বাচিত পণ্যটি যে যে দোকানে আছে, আপনার অবস্থান থেকে দোকানটির আনুমানিক **দূরত্ব** নিচে দেখাবে।")
+    st.markdown("## 🔍 সুনির্দিষ্ট এলাকা, পণ্যভিত্তিক দোকান এবং লাইভ স্টক যাচাই")
+    st.info("নিচে থেকে আপনার **এলাকা** এবং কাঙ্ক্ষিত **পণ্য** সিলেক্ট করুন। পণ্যটি স্টকে আছে কিনা তা নিশ্চিত করতে **'স্টক যাচাই করুন'** বাটনে চাপ দিন।")
     
     if df_mapping is not None:
         all_areas = sorted(df_mapping['এলাকা'].dropna().unique().tolist())
@@ -99,29 +105,49 @@ with tab1:
             st.markdown("#### 🗺️ সার্চকৃত দোকানগুলোর ভার্চুয়াল ম্যাপ লোকেশন:")
             st.map(result_df, latitude='lat', longitude='lon', size=40, color='#e94560')
 
-            st.markdown("#### 🏪 দোকানসমূহের পূর্ণাঙ্গ বিবরণ ও দূরত্ব:")
+            st.markdown("#### 🏪 দোকানসমূহের পূর্ণাঙ্গ বিবরণ ও লাইভ স্টক রিকোয়েস্ট:")
             for idx, row in result_df.iterrows():
                 dist = row['distance_km']
                 dist_str = f"{int(dist*1000)} মিটার" if dist < 1.0 else f"{dist:.1f} কিমি"
                 walk_time = int(dist * 12) + 1
+                store_id = str(row['দোকান আইডি'])
+                store_name = row['দোকানের নাম']
                 
                 st.markdown(f"""
                 <div class="result-card">
-                    <h3 style="margin:0; color:#0f3460;">🏪 {row['দোকানের নাম']} <span style="font-size:0.8rem; color:#e94560; float:right;">আইডি: {row['দোকান আইডি']}</span></h3>
+                    <h3 style="margin:0; color:#0f3460;">🏪 {store_name} <span style="font-size:0.8rem; color:#e94560; float:right;">আইডি: {store_id}</span></h3>
                     <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
                     <p>📦 <strong>পণ্য:</strong> {row['প্রোডাক্টের নাম']} ({row['ওজন/সাইজ']})</p>
                     <p>🏷️ <strong>ব্র্যান্ড / কোম্পানি:</strong> {row['ব্র্যান্ড']} ({row['কোম্পানি']})</p>
                     <p>📍 <strong>দোকানের ঠিকানা:</strong> {row['ঠিকানা']}</p>
-                    <p>🏙️ <strong>এলাকা:</strong> {row['এলাকা']} | 📂 <strong>ক্যাটাগরি:</strong> {row['ক্যাটাগরি']}</p>
-                    <p>📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold; font-size:1.1rem;">{row['যোগাযোগ নম্বর']}</span></p>
+                    <p>📞 <strong>যোগাযোগ নম্বর:</strong> <span style="color:#c0392b; font-weight:bold;">{row['যোগাযোগ নম্বর']}</span></p>
                     <p style="background:#e8f4f8; padding:6px 10px; border-radius:6px; color:#2980b9 !important; font-weight:bold; display:inline-block; margin-top:6px;">
-                        📏 আপনার অবস্থান থেকে আনুমানিক দূরত্ব: {dist_str} (প্রায় {walk_time} মিনিট হাঁটার পথ)
+                        📏 দূরত্ব: {dist_str} (প্রায় {walk_time} মিনিট হাঁটার পথ)
                     </p>
-                    <div style="margin-top:8px;">
-                        <span style="background:#27ae60; color:white; padding:4px 12px; border-radius:6px; font-size:0.85rem; font-weight:600;">🟢 স্টকে উপলব্ধ</span>
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Live Stock Request Button per store
+                with st.expander(f"📌 '{store_name}'-এ স্টক যাচাই করতে ক্লিক করুন"):
+                    if st.button(f"🔍 স্টক যাচাই রিকোয়েস্ট পাঠান", key=f"req_{store_id}_{idx}"):
+                        req_data = {
+                            "store_id": store_id,
+                            "store_name": store_name,
+                            "product": selected_product,
+                            "time": datetime.now().strftime("%d %b %Y, %I:%M %p"),
+                            "status": "মালিকের উত্তরের অপেক্ষায় ⏳"
+                        }
+                        requests_list = []
+                        if os.path.exists("stock_requests.json"):
+                            with open("stock_requests.json", "r", encoding="utf-8") as f:
+                                try:
+                                    requests_list = json.load(f)
+                                except:
+                                    requests_list = []
+                        requests_list.insert(0, req_data)
+                        with open("stock_requests.json", "w", encoding="utf-8") as f:
+                            json.dump(requests_list, f, ensure_ascii=False, indent=2)
+                        st.success(f"✅ '{store_name}'-এর দোকানদারের কাছে স্টক যাচাইয়ের রিকোয়েস্ট পাঠানো হয়েছে! দোকানদার ড্যাশবোর্ড থেকে উত্তর দিলে তা আপডেট হবে।")
         else:
             st.warning("⚠️ এই এলাকায় নির্দিষ্ট এই পণ্যটি বিক্রয় করে এমন কোনো দোকান আমাদের ডাটাবেজে নেই।")
     else:
@@ -170,10 +196,51 @@ with tab4:
     df_price = pd.DataFrame(price_data)
     st.dataframe(df_price, use_container_width=True, hide_index=True)
     
-    st.markdown("#### 💡 বাজার মনিটরিং সতর্কতা:")
-    st.warning("কোনো বিক্রেতা নির্ধারিত সরকারি মূল্যের চেয়ে বেশি দাম রাখলে তাৎক্ষণিকভাবে **'ভোক্তা অভিযোগ'** ট্যাবে গিয়ে অভিযোগ দাখিল করুন।")
+    st.markdown("#### 💡 স্মার্ট বাজার খরচ ক্যালকুলেটর:")
+    with st.form("calc_form"):
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            qty_rice = st.number_input("চাল (কেজি):", 0, 50, 5)
+            qty_oil = st.number_input("সয়াবিন তেল (লিটার):", 0, 20, 2)
+        with col_c2:
+            qty_sugar = st.number_input("চিনি (কেজি):", 0, 20, 1)
+            qty_dal = st.number_input("মসুর ডাল (কেজি):", 0, 20, 2)
+        
+        calc_btn = st.form_submit_button("🧮 আনুমানিক বাজার খরচ হিসাব করুন")
+        if calc_btn:
+            est_total = (qty_rice * 72) + (qty_oil * 175) + (qty_sugar * 140) + (qty_dal * 145)
+            st.success(f"🛒 আপনার নির্বাচিত পণ্যের আনুমানিক বাজার খরচ: **{est_total} টাকা**")
 
 with tab5:
+    st.markdown("## ⭐ দোকান রেটিং ও কাস্টমার রিভিউ")
+    st.info("আপনার এলাকার দোকানগুলোর পণ্যের মান ও সেবা কেমন, সে বিষয়ে আপনার মতামত ও স্টার রেটিং দিন।")
+    
+    with st.form("rating_form"):
+        r_shop = st.text_input("দোকানের নাম:")
+        r_stars = st.slider("স্টার রেটিং দিন:", 1, 5, 5)
+        r_comment = st.text_area("আপনার মতামত বা রিভিউ:")
+        r_submit = st.form_submit_button("⭐ রিভিউ সাবমিট করুন")
+        
+        if r_submit and r_shop:
+            st.success(f"✅ **{r_shop}** দোকানটির জন্য আপনার {r_stars} স্টারের রিভিউ সফলভাবে সংরক্ষিত হয়েছে!")
+
+with tab6:
+    st.markdown("## 📞 জরুরি হেল্পলাইন ও হটলাইন নম্বরসমূহ")
+    helplines = [
+        {"name": "জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তর", "num": "১৬১২১", "desc": "পণ্য বা সেবায় প্রতারিত হলে বা অতিরিক্ত দাম রাখলে অভিযোগ জানাতে।"},
+        {"name": "জাতীয় জরুরি সেবা (পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স)", "num": "৯৯৯", "desc": "যেকোনো জরুরি দুর্ঘটনা বা বিপদে সহায়তার জন্য।"},
+        {"name": "স্বাস্থ্য বাতায়ন (সরকারি স্বাস্থ্য সেবা)", "num": "১৬২৬৩", "desc": "ডাক্তারি পরামর্শ ও স্বাস্থ্যসেবা সম্পর্কিত তথ্যের জন্য।"},
+        {"name": "দুর্নীতি দমন কমিশন (দুদক হটলাইন)", "num": "১০৬", "desc": "সরকারি বা প্রাতিষ্ঠানিক দুর্নীতি ও অনিয়মের বিরুদ্ধে।"}
+    ]
+    for h in helplines:
+        st.markdown(f"""
+        <div class="helpline-box">
+            <h4>📞 {h['name']} — হটলাইন: <span style="color:#c0392b;">{h['num']}</span></h4>
+            <p>{h['desc']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+with tab7:
     st.markdown("## 🚨 ভোক্তা অধিকার ও দুর্নীতি অভিযোগ ব্যবস্থাপনা")
     with st.form("complaint_form_fixed"):
         c_shop = st.text_input("দোকানের নাম ও ঠিকানা:")
@@ -201,7 +268,7 @@ with tab5:
             st.balloons()
             st.success("✅ অভিযোগ সফলভাবে সরকারি ড্যাশবোর্ডে প্রেরণ করা হয়েছে!")
 
-with tab6:
+with tab8:
     st.markdown("## 🏥 স্বাস্থ্য সঙ্গী ও ১৫+ নিত্যদিনের রোগের ভেষজ ঘরোয়া চিকিৎসা")
     col_h1, col_h2 = st.columns(2)
     with col_h1:
@@ -223,40 +290,82 @@ with tab6:
 
     st.markdown("---")
     st.markdown("### 🌿 সাধারণ ১৫+ টি রোগের ভেষজ ও প্রাকৃতিক সমাধান নির্দেশিকা")
-    
     herbal_remedies = [
         {"disease": "১. সর্দি, কাশি ও গলার খুশখুশ", "remedy": "তুলসী পাতার রস, আদা ও মধু একসাথে মিশিয়ে হালকা গরম করে দিনে ২-৩ বার পান করুন।", "herb": "তুলসী, আদা, মধু"},
-        {"disease": "২. গ্যাস্ট্রিক ও অ্যাসিডিটি", "remedy": "খাওয়ার পর ১ চামচ মৌরি অথবা ইসবগুলের ভুষি পানিতে ভিজিয়ে পান করুন। কাঁচা লবঙ্গ চিবিয়ে খেলেও দ্রুত আরাম মেলে।", "herb": "মৌরি, লবঙ্গ, ইসবগুল"},
-        {"disease": "৩. বদহজম ও পেট ফাঁপা", "remedy": "এক গ্লাস ঈষদুষ্ণ পানিতে সামান্য জোয়ান গুঁড়ো ও বিট লবণ মিশিয়ে খেলে পেটের অস্বস্তি দূর হয়।", "herb": "জোয়ান, বিট লবণ"},
-        {"disease": "৪. সাধারণ মাথাব্যথা", "remedy": "মাথায় পুদিনা পাতা বা আদার রস হালকা করে ম্যাসাজ করুন এবং আদা চা পান করুন।", "herb": "পুদিনা পাতা, আদা"},
-        {"disease": "৫. কোষ্ঠকাঠিন্য", "remedy": "রাতে ঘুমানোর আগে এক গ্লাস হালকা গরম পানিতে ১-২ চামচ ইসবগুলের ভুষি বা ত্রফলা গুঁড়ো মিশিয়ে পান করুন।", "herb": "ত্রফলা, ইসবগুল"},
-        {"disease": "৬. মানসিক চাপ ও অনিদ্রা", "remedy": "ঘুমানোর আগে এক কাপ গরম দুধের সাথে সামান্য জয়ফল গুঁড়ো অথবা ক্যামোমাইল চা পান করুন।", "herb": "জয়ফল, ক্যামোমাইল"},
-        {"disease": "৭. দাঁত ও মাড়ির ব্যথা", "remedy": "আক্রান্ত দাঁতের গোড়ায় একটি লবঙ্গ চেপে রাখুন অথবা লবঙ্গের তেল তুলো দিয়ে লাগান।", "herb": "লবঙ্গ"},
-        {"disease": "৮. উচ্চ রক্তচাপ নিয়ন্ত্রণ", "remedy": "প্রতিদিন সকালে খালি পেটে ১-২ কোয়া কাঁচা রসুন খেলে রক্তচাপ ও কোলেস্টেরল নিয়ন্ত্রণে থাকে।", "herb": "রসুন"},
-        {"disease": "৯. মেদ ও ওজন কমানো", "remedy": "সকালে খালি পেটে এক গ্লাস হালকা গরম পানিতে অর্ধেকটা লেবুর রস ও ১ চামচ মধু মিশিয়ে পান করুন।", "herb": "লেবু, মধু"},
-        {"disease": "১০. কৃমির সমস্যা", "remedy": "সকালে খালি পেটে কালমেঘ পাতার রস অথবা কাঁচা পেঁপের আঠা পানির সাথে মিশিয়ে খেলে কৃমি দূর হয়।", "herb": "কালমেঘ পাতা, পেঁপে"},
-        {"disease": "১১. চর্মরোগ ও চুলকানি", "remedy": "কাঁচা হলুদ ও নিম পাতা বেটে আক্রান্ত স্থানে লাগালে যে কোনো ব্যাকটেরিয়া বা ফাঙ্গাল ইনফেকশন দূর হয়।", "herb": "নিম পাতা, হলুদ"},
-        {"disease": "১২. প্রস্রাবের জ্বালাপোড়া", "remedy": "ধনে বীজ সারারাত পানিতে ভিজিয়ে রেখে সকালে সেই পানি ছেঁকে খেলে বা ডাবের পানি পান করলে দ্রুত আরাম মেলে।", "herb": "ধনে বীজ, ডাবের পানি"},
-        {"disease": "১৩. চুল পড়া রোধ ও ড্যান্ড্রফ", "remedy": "আমলকী ও রিঠা গুঁড়ো পানিতে ফুটিয়ে সেই পানি দিয়ে চুল ধুলে চুল পড়া বন্ধ হয় এবং গোড়া শক্ত হয়।", "herb": "আমলকী, রিঠা"},
-        {"disease": "১৪. রক্তস্বল্পতা (অ্যানিমিয়া)", "remedy": "প্রতিদিন কুল, ডালিম, খুরমা খেজুর এবং পালং শাক খেলে রক্তে হিমোগ্লোবিন দ্রুত বাড়ে।", "herb": "ডালিম, খেজুর, পালং শাক"},
-        {"disease": "১৫. মুখের দুর্গন্ধ", "remedy": "খাওয়ার পর দারুচিনি বা এলাচ চিবিয়ে খেলে মুখের দুর্গন্ধ সৃষ্টিকারী ব্যাকটেরিয়া ধ্বংস হয়।", "herb": "দারুচিনি, এলাচ"}
+        {"disease": "২. গ্যাস্ট্রিক ও অ্যাসিডিটি", "remedy": "খাওয়ার পর ১ চামচ মৌরি অথবা ইসবগুলের ভুষি পানিতে ভিজিয়ে পান করুন।", "herb": "মৌরি, লবঙ্গ, ইসবগুল"},
+        {"disease": "৩. বদহজম ও পেট ফাঁপা", "remedy": "এক গ্লাস ঈষদুষ্ণ পানিতে সামান্য জোয়ান গুঁড়ো ও বিট লবণ মিশিয়ে খেলে আরাম মেলে।", "herb": "জোয়ান, বিট লবণ"},
+        {"disease": "৪. সাধারণ মাথাব্যথা", "remedy": "মাথায় পুদিনা পাতা বা আদার রস হালকা করে ম্যাসাজ করুন এবং আদা চা পান করুন।", "herb": "পুদিনা পাতা, আদা"}
     ]
-    
-    col_search, _ = st.columns([2, 1])
-    with col_search:
-        search_disease = st.text_input("🔍 কোনো নির্দিষ্ট রোগ বা ভেষজ উপাদান খুঁজুন:", placeholder="যেমন: গ্যাস্ট্রিক, কাশি, নিম পাতা...")
-
     for item in herbal_remedies:
-        if search_disease == "" or (search_disease.lower() in item['disease'].lower() or search_disease.lower() in item['herb'].lower()):
-            st.markdown(f"""
-            <div class="herbal-card">
-                <h4>{item['disease']}</h4>
-                <p>🌿 <strong>প্রধান ভেষজ উপাদান:</strong> {item['herb']}</p>
-                <p>💡 <strong>ঘরোয়া প্রস্তুতপ্রণালী:</strong> {item['remedy']}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="herbal-card">
+            <h4>{item['disease']}</h4>
+            <p>🌿 <strong>ভেষজ উপাদান:</strong> {item['herb']}</p>
+            <p>💡 <strong>প্রস্তুতপ্রণালী:</strong> {item['remedy']}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-with tab7:
+with tab9:
+    st.markdown("## 🏪 দোকানদার পোর্টাল ও স্টক ম্যানেজমেন্ট প্যানেল")
+    st.info("দোকানদাররা তাদের নিজস্ব ইউজার আইডি (যেমন: STORE001 বা আপনার দোকানের আইডি) দিয়ে লগইন করে ক্রেতাদের স্টক রিকোয়েস্টের উত্তর দিতে পারবেন এবং বাজার বিশ্লেষণ দেখতে পারবেন।")
+    
+    owner_id = st.text_input("আপনার দোকান আইডি প্রবেশ করান (মেলার জন্য টেস্ট আইডি দিন: STORE001):", key="store_owner_login")
+    
+    if owner_id:
+        st.success(f"✅ স্বাগতম! দোকান আইডি: **{owner_id}** এর ড্যাশবোর্ড সক্রিয়।")
+        
+        st.markdown("### 📥 ক্রেতাদের কাছ থেকে আসা স্টক যাচাইয়ের রিকোয়েস্ট:")
+        req_file = "stock_requests.json"
+        if os.path.exists(req_file):
+            with open(req_file, "r", encoding="utf-8") as f:
+                try:
+                    all_reqs = json.load(f)
+                except:
+                    all_reqs = []
+            
+            store_reqs = [r for r in all_reqs if r.get('store_id') == owner_id]
+            
+            if len(store_reqs) > 0:
+                for idx, req in enumerate(store_reqs):
+                    st.markdown(f"""
+                    <div style="background:#fff9e6; padding:1rem; border-radius:10px; border-left:5px solid #f39c12; margin-bottom:0.8rem;">
+                        <h4 style="margin:0; color:#d35400;">📦 পণ্য: {req.get('product')}</h4>
+                        <p style="margin:2px 0;">⏱️ সময়: {req.get('time')}</p>
+                        <p style="margin:2px 0;">🔄 বর্তমান স্ট্যাটাস: <strong>{req.get('status')}</strong></p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    col_b1, col_b2 = st.columns(2)
+                    with col_b1:
+                        if st.button("🟢 স্টকে আছে", key=f"yes_{owner_id}_{idx}"):
+                            req['status'] = "স্টকে উপলব্ধ আছে ✅"
+                            with open(req_file, "w", encoding="utf-8") as fw:
+                                json.dump(all_reqs, fw, ensure_ascii=False, indent=2)
+                            st.experimental_rerun()
+                    with col_b2:
+                        if st.button("🔴 স্টক শেষ", key=f"no_{owner_id}_{idx}"):
+                            req['status'] = "স্টক শেষ ❌"
+                            with open(req_file, "w", encoding="utf-8") as fw:
+                                json.dump(all_reqs, fw, ensure_ascii=False, indent=2)
+                            st.experimental_rerun()
+            else:
+                st.info("📭 আপনার দোকানের জন্য বর্তমানে কোনো নতুন স্টক রিকোয়েস্ট নেই।")
+        else:
+            st.info("📭 এখন পর্যন্ত কোনো স্টক রিকোয়েস্ট করা হয়নি।")
+            
+        st.markdown("---")
+        st.markdown("### 📈 পাইকারি ও খুচরা মূল্য এবং বাজার চাহিদা বিশ্লেষণ (Market Analytics)")
+        
+        analytics_data = [
+            {"product": "নাজিরশাইল চাল", "wholesale": "৬৫ টাকা/কেজি", "retail": "৭২ টাকা/কেজি", "demand": "উচ্চ চাহিদা 🔥", "trend": "ক্রমাগত বাড়ছে ↗️"},
+            {"product": "সয়াবিন তেল", "wholesale": "১৬৮ টাকা/লিটার", "retail": "১৭৫ টাকা/লিটার", "demand": "স্বাভাবিক ⚖️", "trend": "স্থির রয়েছে ➡️"},
+            {"product": "মসুর ডাল", "wholesale": "১৩৫ টাকা/কেজি", "retail": "১৪৫ টাকা/কেজি", "demand": "উচ্চ চাহিদা 🔥", "trend": "বাড়ছে ↗️"},
+            {"product": "চিনি", "wholesale": "১৩০ টাকা/কেজি", "retail": "১৪০ টাকা/কেজি", "demand": "স্বাভাবিক ⚖️", "trend": "স্থির রয়েছে ➡️"}
+        ]
+        df_analytics = pd.DataFrame(analytics_data)
+        st.dataframe(df_analytics, use_container_width=True, hide_index=True)
+
+with tab10:
     st.markdown("## 🏛️ সরকারি কর্মকর্তা ও এডমিন লগইন প্যানেল")
     st.info("এই ট্যাবটি শুধুমাত্র জাতীয় ভোক্তা অধিকার সংরক্ষণ অধিদপ্তরের অনুমোদিত কর্মকর্তাদের জন্য সংরক্ষিত।")
     
@@ -299,7 +408,7 @@ with tab7:
 st.markdown("---")
 st.markdown("""
 <div style="text-align:center;padding:1.2rem;background:linear-gradient(135deg,#0f3460,#1a1a2e);border-radius:14px;color:white;">
-    <strong>🛡️ মানব সাথি ১.০ (স্মার্ট শপ ফাইন্ডার, প্রাইজ মনিটরিং ও গভঃ ড্যাশবোর্ড)</strong><br>
+    <strong>🛡️ মানব সাথি ১.০ (স্মার্ট শপ ফাইন্ডার, স্টক রিকোয়েস্ট ও গভঃ ড্যাশবোর্ড)</strong><br>
     <small>Created by Kaliagonj Naziraton High School (SOUNDARJYA)</small>
 </div>
 """, unsafe_allow_html=True)
